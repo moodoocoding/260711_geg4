@@ -35,6 +35,85 @@ const STAT_LABELS: Record<string, { ko: string; color: string }> = {
   speed: { ko: "스피드", color: "bg-amber-500" }
 };
 
+// 2. 1세대 포켓몬 151마리 한글 이름 매핑 사전 (API 속도 최적화를 위해 로컬 정의)
+const POKEMON_KO_NAMES: Record<string, string> = {
+  bulbasaur: "이상해씨", ivysaur: "이상해풀", venusaur: "이상해꽃",
+  charmander: "파이리", charmeleon: "리자드", charizard: "리자몽",
+  squirtle: "꼬부기", wartortle: "어니부기", blastoise: "거북왕",
+  caterpie: "캐터피", metapod: "단데기", butterfree: "버터플",
+  weedle: "뿔충이", kakuna: "딱충이", beedrill: "독침붕",
+  pidgey: "구구", pidgeotto: "피전", pidgeot: "피전투",
+  rattata: "꼬렛", raticate: "레트라",
+  spearow: "깨비참", fearow: "깨비드릴조",
+  ekans: "아보", arbok: "아보크",
+  pikachu: "피카츄", raichu: "라이츄",
+  sandshrew: "모래두지", sandslash: "고지",
+  "nidoran-f": "니드런♀", nidorina: "니도리나", nidoqueen: "니도퀸",
+  "nidoran-m": "니드런♂", nidorino: "니도리노", nidoking: "니도킹",
+  clefairy: "삐삐", clefable: "픽시",
+  vulpix: "식스테일", ninetales: "나인테일",
+  jigglypuff: "푸린", wigglytuff: "푸크린",
+  zubat: "주뱃", golbat: "골뱃",
+  oddish: "뚜벅초", gloom: "냄새꼬", vileplume: "라플레시아",
+  paras: "파라스", parasect: "파라섹트",
+  venonat: "콘팡", venomoth: "도나리",
+  diglett: "디그다", dugtrio: "닥트리오",
+  meowth: "나옹", persian: "페르시온",
+  psyduck: "고라파덕", golduck: "골덕",
+  mankey: "망키", primeape: "성원숭",
+  growlithe: "가디", arcanine: "윈디",
+  poliwag: "발챙이", poliwhirl: "슈륙챙이", poliwrath: "강챙이",
+  abra: "캐이시", kadabra: "윤겔라", alakazam: "후딘",
+  machop: "알통몬", machoke: "근육몬", machamp: "괴력몬",
+  bellsprout: "모다피", weepinbell: "우츠동", victreebel: "우츠보트",
+  tentacool: "왕눈해", tentacruel: "독파리",
+  geodude: "꼬마돌", graveler: "데구리", golem: "딱구리",
+  ponyta: "포니타", rapidash: "날쌩마",
+  slowpoke: "야돈", slowbro: "야도란",
+  magnemite: "코일", magneton: "레어코일",
+  farfetchd: "파오리",
+  doduo: "두두", dodrio: "두트리오",
+  seel: "쥬쥬", dewgong: "쥬레곤",
+  grimer: "질퍽이", muk: "질뻐기",
+  shellder: "셀러", cloyster: "파르셀",
+  gastly: "고스", haunter: "고우스트", gengar: "팬텀",
+  onix: "롱스톤",
+  drowzee: "슬리프", hypno: "슬리퍼",
+  krabby: "크랩", kingler: "킹크랩",
+  voltorb: "찌리리공", electrode: "붐볼",
+  exeggcute: "아라리", exeggutor: "나시",
+  cubone: "탕구리", marowak: "텅구리",
+  hitmonlee: "시라소몬", hitmonchan: "홍수몬",
+  lickitung: "내루미",
+  koffing: "또가스", weezing: "또도가스",
+  rhyhorn: "뿔카노", rhydon: "코뿌리",
+  chansey: "럭키",
+  tangela: "덩쿠리",
+  kangaskhan: "캥카",
+  horsea: "쏘드라", seadra: "시드라",
+  goldeen: "콘치", seaking: "왕콘치",
+  staryu: "별가사리", starmie: "아쿠스타",
+  "mr-mime": "마임맨",
+  scyther: "스라크",
+  jynx: "루주라",
+  electabuzz: "에레브",
+  magmar: "마그마",
+  pinsir: "쁘사이저",
+  tauros: "켄타로스",
+  magikarp: "잉어킹", gyarados: "갸라도스",
+  lapras: "라프라스",
+  ditto: "메타몽",
+  eevee: "이브이", vaporeon: "샤미드", jolteon: "쥬피썬더", flareon: "부스터",
+  porygon: "폴리곤",
+  omanyte: "암나이트", omastar: "암스타",
+  kabuto: "투구", kabutops: "투구푸스",
+  aerodactyl: "프테라",
+  snorlax: "잠만보",
+  articuno: "프리져", zapdos: "썬더", moltres: "파이어",
+  dratini: "미뇽", dragonair: "신뇽", dragonite: "망나뇽",
+  mewtwo: "뮤츠", mew: "뮤"
+};
+
 interface PokemonBase {
   name: string;
   url: string;
@@ -102,10 +181,10 @@ export default function DogamPage() {
     setInitialLoading(true);
     setError(null);
     try {
-      // 1세대 및 대중적인 386마리 타겟 (전체 데이터 속도 및 정합성 고려)
-      const res = await fetch("https://pokeapi.co/api/v2/pokemon?limit=386");
+      // 1세대 주요 151마리 목록 타겟팅 (속도 및 정합성 최적화)
+      const res = await fetch("https://pokeapi.co/api/v2/pokemon?limit=151");
       if (!res.ok) throw new Error("전체 포켓몬 목록을 가져오는 데 실패했습니다.");
-      const data = await res.ok ? await res.json() : null;
+      const data = await res.json();
       if (data && data.results) {
         setAllPokemon(data.results);
         setFilteredPokemon(data.results);
@@ -144,7 +223,7 @@ export default function DogamPage() {
         url: p.pokemon.url
       }));
 
-      // 전체 불러온 도감 범위 내(386마리 이하)의 포켓몬으로 교집합 필터링하여 일관성 유지
+      // 1세대 범위(151마리) 내의 포켓몬으로 교집합 필터링
       const validNames = new Set(allPokemon.map(p => p.name));
       const filtered = typePokemon.filter((p: PokemonBase) => validNames.has(p.name));
 
@@ -183,19 +262,8 @@ export default function DogamPage() {
             if (!res.ok) throw new Error("포켓몬 상세 정보를 가져올 수 없습니다.");
             const pokemonData = await res.json();
 
-            // 한국어 이름 조회를 위해 species API 호출
-            try {
-              const speciesRes = await fetch(pokemonData.species.url);
-              if (speciesRes.ok) {
-                const speciesData = await speciesRes.json();
-                const koNameObj = speciesData.names.find((n: any) => n.language.name === "ko");
-                pokemonData.koName = koNameObj ? koNameObj.name : pokemonData.name;
-              } else {
-                pokemonData.koName = pokemonData.name;
-              }
-            } catch {
-              pokemonData.koName = pokemonData.name;
-            }
+            // 로컬 한글 매핑 사전을 활용해 지연 시간 0ms로 한글 이름 부여
+            pokemonData.koName = POKEMON_KO_NAMES[pokemonData.name] || pokemonData.name;
 
             // 캐시에 보관
             detailCache.current[item.url] = pokemonData;
