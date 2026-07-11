@@ -62,7 +62,7 @@ export default function Home() {
           <Link href="#" className="text-slate-600 hover:text-blue-600 font-bold transition-colors duration-200">
             포켓몬 소개
           </Link>
-          <Link href="#" className="text-slate-600 hover:text-blue-600 font-bold transition-colors duration-200">
+          <Link href="/dogam" className="text-slate-600 hover:text-blue-600 font-bold transition-colors duration-200">
             포켓몬 도감
           </Link>
           <Link 
@@ -78,7 +78,7 @@ export default function Home() {
           <Link href="#" className="text-slate-600 hover:text-blue-600">
             포켓몬 소개
           </Link>
-          <Link href="#" className="text-slate-600 hover:text-blue-600">
+          <Link href="/dogam" className="text-slate-600 hover:text-blue-600">
             포켓몬 도감
           </Link>
           <Link href="#" className="text-blue-600 hover:text-blue-700 font-black bg-blue-50 px-2.5 py-1.5 rounded-lg">
